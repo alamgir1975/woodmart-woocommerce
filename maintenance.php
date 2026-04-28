@@ -1,23 +1,26 @@
-<?php 
+<?php if ( ! defined( 'WOODMART_THEME_DIR' ) ) {
+	exit( 'No direct script access allowed' );
+}
 
-/* Template name: Maintenance */
+if ( ! function_exists( 'woodmart_maintenance_mode' ) ) {
+	function woodmart_maintenance_mode() {
+		if ( ! woodmart_is_maintenance_active() ) {
+			return;
+		}
 
-$GLOBALS['wd_maintenance'] = true;
+        $page_id = woodmart_pages_ids_from_template( 'maintenance' );
 
-get_header(); ?>
-<div class="maintenance-content container" role="main">
+        $page_id = current( $page_id );
 
-	<?php /* The loop */ ?>
-	<?php while ( have_posts() ) : the_post(); ?>
-			<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
+        if ( ! $page_id ) {
+			return;
+		}
 
-				<div class="entry-content">
-					<?php the_content(); ?>
-				</div>
+        if ( ! is_page( $page_id ) && ! is_user_logged_in() ) {
+            wp_redirect( get_permalink( $page_id ) );
+            exit();
+        }
+	}
 
-			</article><!-- #post -->
-	<?php endwhile; ?>
-
-</div><!-- .site-content -->
-
-<?php get_footer(); ?>
+	add_action( 'template_redirect', 'woodmart_maintenance_mode', 10 );
+}
